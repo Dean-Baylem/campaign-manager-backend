@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const HttpError = require("../../models/http-error");
 const Player = require("../../models/user");
 const World = require("../../models/worldbuilding-models/world");
-const Country = require('../../models/worldbuilding-models/subject-models/country');
+const WorldSubject = require("../../models/worldbuilding-models/worldSubject");
 
 
 const createWorld = async (req, res, next) => {
@@ -49,5 +49,73 @@ const createWorld = async (req, res, next) => {
   res.status(201).json({world: newWorld});
 };
 
+const createSubject = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError("Invalid inputs. Please try again.", 422));
+  }
+
+  let homeWorld;
+  try {
+    homeWorld = await World.findById(req.params.worldid);
+  } catch (err) {
+    return next(new HttpError("Could not find world.", 500));
+  }
+
+  let { subjectName, cardImg, hasImg, desc, world, subjectType } = req.body;
+
+  const newSubject = WorldSubject({
+    subjectType,
+    subjectName,
+    cardImg,
+    hasImg,
+    desc,
+    world,
+  });
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await newSubject.save({ session: sess });
+    switch (subjectType) {
+      case "country":
+        homeWorld.countries.push(newSubject);
+        break
+      case "religion":
+        homeWorld.religions.push(newSubject);
+        break
+      case "mythology":
+        homeWorld.mythologies.push(newSubject);
+        break
+      case "conflict":
+        homeWorld.conflicts.push(newSubject);
+        break
+      case "magic":
+        homeWorld.magics.push(newSubject);
+        break
+      case "ecology":
+        homeWorld.ecologies.push(newSubject);
+        break
+      case "faction":
+        homeWorld.factions.push(newSubject);
+        break
+      case "miscellaneous":
+        homeWorld.misc.push(newSubject);
+        break
+      default:
+        return next(new HttpError("Invalid subject type. Please check and try again", 422));
+    }
+    await homeWorld.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("Could not create country. Please try again later", 500)
+    );
+  }
+
+  res.status(201).json({ country: newSubject });
+};
 
 exports.createWorld = createWorld;
+exports.createSubject = createSubject;

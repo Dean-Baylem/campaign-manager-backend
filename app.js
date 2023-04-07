@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 
-const subjectRoutes = require('./routes/subject-routes');
 const worldRoutes = require('./routes/world-routes');
 const userPlaces = require('./routes/user-routes');
 const HttpError = require('./models/http-error');
@@ -14,7 +13,6 @@ app.use(express.json());
 
 app.use('/user', userPlaces);
 app.use('/worlds', worldRoutes);
-app.use('/subjects', subjectRoutes);
 
 // Handling Errors
 

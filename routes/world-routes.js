@@ -13,4 +13,14 @@ router.post(
     worldControllers.createWorld
 );
 
+router.post(
+  "/:worldid/createsubject",
+  [
+    check("subjectType").not().isEmpty(),
+    check("subjectName").not().isEmpty(),
+    check("desc").not().isEmpty(),
+  ],
+  worldControllers.createSubject
+);
+
 module.exports = router;

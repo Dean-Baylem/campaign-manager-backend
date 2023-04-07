@@ -5,12 +5,13 @@ const subjectControllers = require("../controllers/worldbuilding-controllers/sub
 const router = express.Router();
 
 router.post(
-    "/:worldid/createcountry",
+    "/:worldid/createsubject",
     [
-        check('countryName').not().isEmpty(),
+        check('subjectType').not().isEmpty(),
+        check('subjectName').not().isEmpty(),
         check('desc').not().isEmpty()
     ],
-    subjectControllers.createCountry
+    subjectControllers.createSubject
 );
 
 module.exports = router;
