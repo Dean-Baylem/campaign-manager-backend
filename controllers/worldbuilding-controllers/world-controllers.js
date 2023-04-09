@@ -6,6 +6,35 @@ const Player = require("../../models/user");
 const World = require("../../models/worldbuilding-models/world");
 const WorldSubject = require("../../models/worldbuilding-models/worldSubject");
 
+const getWorldById = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError("Invalid inputs. Please try again.", 422));
+  }
+
+  const worldId = req.params.worldid;
+
+  let world;
+  try {
+    world = await World.findById(worldId);
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("Unable to find world. Please try again later.", 500)
+    );
+  }
+
+  if (!world) {
+    return next(
+      new HttpError(
+        "Unable to locate world by id. Please check and try again.",
+        404
+      )
+    );
+  }
+
+  res.json({ world: world.toObject({ getters: true }) });
+};
 
 const createWorld = async (req, res, next) => {
     const errors = validationResult(req);
@@ -48,6 +77,73 @@ const createWorld = async (req, res, next) => {
 
   res.status(201).json({world: newWorld});
 };
+
+const updateWorld = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError("Invalid inputs. Please try again.", 422));
+  }
+
+  const { worldName, worldDesc } = req.body;
+  const worldId = req.params.worldid;
+
+  let world;
+  try {
+    world = await World.findById(worldId);
+  } catch (err) {
+    return next(new HttpError("Would not locate world on server. Please try again later", 500));
+  }
+
+  world.worldName = worldName;
+  world.worldDesc = worldDesc;
+  try {
+    await world.save();
+  } catch (err) {
+    return next(
+      new HttpError(
+        "Would not locate world on server. Please try again later",
+        500
+      )
+    );
+  }
+
+  res.status(200).json({world: world.toObject({ getters: true })});
+}
+
+const deleteWorldById = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError("Invalid inputs. Please try again.", 422));
+  }
+
+  const worldId = req.params.worldid;
+
+  let world;
+  try {
+    world = await World.findById(worldId).populate('creator');
+  } catch (err) {
+    return next(new HttpError("Unable to find world to delete. Please try again later.", 500));
+  }
+  
+
+  if (!world) {
+    return next(new HttpError("Could not find world. Please check details and try again.", 404));
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await world.deleteOne({session: sess});
+    world.creator.worlds.pull(world);
+    await world.creator.save({session: sess});
+    await sess.commitTransaction();
+  } catch (err) {
+    return next(new HttpError("Could not delete. Please try again later", 500));
+  }
+
+  res.status(200).json({message: "World successfully deleted!"});
+}
+
 
 const createSubject = async (req, res, next) => {
   const errors = validationResult(req);
@@ -118,4 +214,7 @@ const createSubject = async (req, res, next) => {
 };
 
 exports.createWorld = createWorld;
+exports.updateWorld = updateWorld;
+exports.getWorldById = getWorldById;
+exports.deleteWorldById = deleteWorldById;
 exports.createSubject = createSubject;

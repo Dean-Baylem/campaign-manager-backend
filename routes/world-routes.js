@@ -4,6 +4,13 @@ const { check } = require("express-validator");
 const worldControllers = require("../controllers/worldbuilding-controllers/world-controllers");
 const router = express.Router();
 
+// World Model Routes
+
+router.get(
+  "/:worldid",
+  worldControllers.getWorldById
+);
+
 router.post(
     "/:userid/createworld",
     [
@@ -13,6 +20,17 @@ router.post(
     worldControllers.createWorld
 );
 
+router.patch("/:worldid/updateworld", 
+  [
+    check("worldName").not().isEmpty(),
+    check("worldDesc").not().isEmpty(),
+  ],
+  worldControllers.updateWorld
+);
+
+router.delete("/:worldid/deleteworld", worldControllers.deleteWorldById);
+
+// World Subject Model Routes
 router.post(
   "/:worldid/createsubject",
   [
