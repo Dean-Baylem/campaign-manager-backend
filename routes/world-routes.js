@@ -36,9 +36,24 @@ router.post(
   [
     check("subjectType").not().isEmpty(),
     check("subjectName").not().isEmpty(),
-    check("desc").not().isEmpty(),
+    check("subjectDesc").not().isEmpty(),
   ],
   worldControllers.createSubject
 );
+
+router.get("/:worldid/getsubject", worldControllers.getSubjectById);
+
+router.get("/:worldid/getallsubjects", worldControllers.getSubjectsByWorldId);
+
+router.patch(
+  "/:worldid/updatesubject",
+  [
+    check("subjectName").not().isEmpty(),
+    check("subjectDesc").not().isEmpty(),
+  ],
+  worldControllers.updateSubjectById
+);
+
+router.delete("/:worldid/deletesubject", worldControllers.deleteSubjectById);
 
 module.exports = router;

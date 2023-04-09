@@ -7,10 +7,6 @@ const World = require("../../models/worldbuilding-models/world");
 const WorldSubject = require("../../models/worldbuilding-models/worldSubject");
 
 const getWorldById = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new HttpError("Invalid inputs. Please try again.", 422));
-  }
 
   const worldId = req.params.worldid;
 
@@ -55,12 +51,12 @@ const createWorld = async (req, res, next) => {
     }
 
     // Prepare new world model  
-    let { worldName, worldDesc, creator } = req.body;
+    let { worldName, worldDesc } = req.body;
 
     const newWorld = World({
         worldName,
         worldDesc,
-        creator,
+        creator: req.params.userid,
     });
 
     try {
@@ -111,10 +107,6 @@ const updateWorld = async (req, res, next) => {
 }
 
 const deleteWorldById = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(new HttpError("Invalid inputs. Please try again.", 422));
-  }
 
   const worldId = req.params.worldid;
 
@@ -158,15 +150,15 @@ const createSubject = async (req, res, next) => {
     return next(new HttpError("Could not find world.", 500));
   }
 
-  let { subjectName, cardImg, hasImg, desc, world, subjectType } = req.body;
+  let { subjectName, cardImg, hasImg, subjectDesc, subjectType } = req.body;
 
   const newSubject = WorldSubject({
     subjectType,
     subjectName,
     cardImg,
     hasImg,
-    desc,
-    world,
+    subjectDesc,
+    world: req.params.worldid
   });
 
   try {
@@ -213,8 +205,135 @@ const createSubject = async (req, res, next) => {
   res.status(201).json({ country: newSubject });
 };
 
+const getSubjectById = async (req, res, next) => {
+
+  subjectId = req.body.subjectId
+
+  let subject;
+  try {
+    subject = await WorldSubject.findById(subjectId)
+  } catch (err) {
+    return next(new HttpError("Could not find subjects at this time. Please try again later.", 500));
+  }
+
+  if (!subject) {
+    return next(new HttpError("Unable to find subject, please check inputs and try again.", 404));
+  }
+
+  res.status(200).json({subject: subject.toObject({getters: true})});
+
+}
+
+const getSubjectsByWorldId = async (req, res, next) => {
+  const worldId = req.params.worldid;
+
+  let subjects;
+
+  try {
+    subjects = await WorldSubject.find({world: worldId})
+  } catch (err) {
+    return next(new HttpError("There was a problem searching for subjects. Please try again later", 500));
+  }
+
+  if (!subjects) {
+    return next(new HttpError("No subjects found for this world", 404));
+  }
+
+  res.status(200).json({allSubjects: subjects});
+}
+
+const updateSubjectById = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new HttpError("Invalid inputs. Please try again.", 422));
+  }
+
+  let { subjectId, subjectName, subjectDesc } = req.body;
+
+  let subject;
+  try {
+    subject = await WorldSubject.findById(subjectId)
+  } catch (err) {
+    return next(new HttpError("Could not find subject. Please try again later", 500));
+  }
+
+  if (!subject) {
+    return next(new HttpError("Could not find subject. Please check details and try again.", 404));
+  }
+
+  subject.subjectName = subjectName;
+  subject.subjectDesc = subjectDesc;
+  try {
+    await subject.save();
+  } catch (err) {
+    return next(new HttpError("Unable to save changes. Please try again later.", 500));
+  }
+
+  res.status(200).json({subject: subject.toObject({getters: true})});
+}
+
+const deleteSubjectById = async (req, res, next) => {
+  const subjectId = req.body.subjectId;
+
+  let subject;
+  try {
+    subject = await WorldSubject.findById(subjectId).populate('world');
+  } catch (err) {
+    return next(new HttpError("There was problem locating the subject. Please try again later.", 500));
+  }
+
+  if (!subject) {
+    return next(new HttpError("Could not find subject, please check details and try again.", 404));
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await subject.deleteOne({ session: sess });
+    switch (subject.subjectType) {
+      case "country":
+        subject.world.countries.pull(subject);
+        break;
+      case "religion":
+        subject.world.religions.pull(subject);
+        break;
+      case "mythology":
+        subject.world.mythologies.pull(subject);
+        break;
+      case "conflict":
+        subject.world.conflicts.pull(subject);
+        break;
+      case "magic":
+        subject.world.magics.pull(subject);
+        break;
+      case "ecology":
+        subject.world.ecologies.pull(subject);
+        break;
+      case "faction":
+        subject.world.factions.pull(subject);
+        break;
+      case "miscellaneous":
+        subject.world.misc.pull(subject);
+        break;
+      default:
+        break;
+    }  
+    await subject.world.save({session: sess});
+    await sess.commitTransaction();
+  } catch (err) {
+    // console.log(err);
+    return next(new HttpError("There was a problem deleting the subject. Please try again later.", 500));
+  }
+
+  res.status(200).json({ message: "Subject successfully deleted!" });
+}
+
 exports.createWorld = createWorld;
 exports.updateWorld = updateWorld;
 exports.getWorldById = getWorldById;
 exports.deleteWorldById = deleteWorldById;
 exports.createSubject = createSubject;
+exports.updateSubjectById = updateSubjectById;
+exports.getSubjectById = getSubjectById;
+exports.getSubjectsByWorldId = getSubjectsByWorldId;
+exports.deleteSubjectById = deleteSubjectById;
