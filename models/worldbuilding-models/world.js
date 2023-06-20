@@ -40,7 +40,7 @@ const worldSchema = new Schema({
   heroicEvents: [
     { type: mongoose.Types.ObjectId, required: true, ref: "HeroicEvent" },
   ],
-  comments: [{ type: mongoose.Types.ObjectId, required: true, ref: "Comment" }],
+  comments: [{ type: mongoose.Types.ObjectId, ref: "Comment" }],
 });
 
 module.exports = mongoose.model('World', worldSchema);

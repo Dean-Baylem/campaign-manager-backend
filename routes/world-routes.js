@@ -6,25 +6,19 @@ const router = express.Router();
 
 // World Model Routes
 
-router.get(
-  "/:worldid",
-  worldControllers.getWorldById
-);
+router.get("/getall/:playerid", worldControllers.getWorldsByPlayerId);
+
+router.get("/getone/:worldid", worldControllers.getWorldById);
 
 router.post(
-    "/:userid/createworld",
-    [
-        check('worldName').not().isEmpty(),
-        check('worldDesc').not().isEmpty(),
-    ],
-    worldControllers.createWorld
+  "/createworld/:playerid",
+  [check("worldName").not().isEmpty(), check("worldDesc").not().isEmpty()],
+  worldControllers.createWorld
 );
 
-router.patch("/:worldid/updateworld", 
-  [
-    check("worldName").not().isEmpty(),
-    check("worldDesc").not().isEmpty(),
-  ],
+router.patch(
+  "/updateworld/:worldid",
+  [check("worldName").not().isEmpty(), check("worldDesc").not().isEmpty()],
   worldControllers.updateWorld
 );
 
@@ -32,7 +26,7 @@ router.delete("/:worldid/deleteworld", worldControllers.deleteWorldById);
 
 // World Subject Model Routes
 router.post(
-  "/:worldid/createsubject",
+  "/createsubject/:worldid",
   [
     check("subjectType").not().isEmpty(),
     check("subjectName").not().isEmpty(),
@@ -41,19 +35,24 @@ router.post(
   worldControllers.createSubject
 );
 
-router.get("/:worldid/getsubject", worldControllers.getSubjectById);
+router.get("/getsubject/:subjectid", worldControllers.getSubjectById);
 
-router.get("/:worldid/getallsubjects", worldControllers.getSubjectsByWorldId);
+router.get("/getallsubjects/:subjecttype/:worldid", worldControllers.getSubjectsByWorldIdAndType);
 
 router.patch(
-  "/:worldid/updatesubject",
-  [
-    check("subjectName").not().isEmpty(),
-    check("subjectDesc").not().isEmpty(),
-  ],
+  "/updatesubject/:subjectid",
+  [check("subjectName").not().isEmpty(), check("subjectDesc").not().isEmpty()],
   worldControllers.updateSubjectById
 );
 
-router.delete("/:worldid/deletesubject", worldControllers.deleteSubjectById);
+router.delete("/deletesubject/:subjectid", worldControllers.deleteSubjectById);
+
+// Subject Record Routes
+
+router.post("/createrecord/:subjectid", worldControllers.createSubjectRecord);
+
+router.patch("/updaterecord/:recordid", worldControllers.updateSubjectRecord);
+
+router.delete("/deleterecord/:recordid", worldControllers.deleteSubjectRecord);
 
 module.exports = router;

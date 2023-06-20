@@ -1,13 +1,9 @@
 const express = require("express");
 const { check } = require('express-validator');
 
-const userControllers = require("../controllers/user-controllers");
+const playerControllers = require("../controllers/player-controllers");
 const router = express.Router();
 
-router.use((req, res, next) => {
-  console.log("Hello World");
-  next();
-});
 
 router.get("/", (req, res, next) => {
   console.log("GET REQUEST");
@@ -16,17 +12,17 @@ router.get("/", (req, res, next) => {
 
 router.post(
   "/login",
-  userControllers.login
+  playerControllers.login
 );
 
 router.post(
   "/register",
   [
-    check('username').not().isEmpty(),
+    check('playername').not().isEmpty(),
     check('email').normalizeEmail().isEmail(),
     check('password').isLength({min: 6})
   ],
-  userControllers.register
+  playerControllers.register
 );
 
 
