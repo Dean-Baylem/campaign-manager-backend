@@ -4,6 +4,33 @@ const jwt = require("jsonwebtoken");
 const HttpError = require("../models/http-error");
 const Player = require("../models/player");
 
+const allowTestLogin = async (req, res, next) => {
+  let player;
+  try {
+    player = await Player.findById("644b4db719d61c6b06d39527");
+  } catch (err) {
+    return next(new HttpError("Uh-oh. Problem!", 500));
+  }
+
+  let token;
+  try {
+    token = jwt.sign(
+      { playerId: player.id, email: player.email },
+      process.env.JWT_KEY,
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    return next(
+      new HttpError(
+        "Unable to log in, please check credentials and try again.",
+        401
+      )
+    );
+  }
+
+  res.json({ playerId: player.id, email: player.email, token: token });
+};
+
 const login = async (req, res, next) => {
   let { email, password } = req.body;
 
@@ -65,7 +92,7 @@ const login = async (req, res, next) => {
     );
   }
 
-  res.json({playerId: player.id, email: player.email, token: token});
+  res.json({ playerId: player.id, email: player.email, token: token });
 };
 
 // Register Player details to MongoDB
@@ -140,3 +167,4 @@ const register = async (req, res, next) => {
 
 exports.register = register;
 exports.login = login;
+exports.allowTestLogin = allowTestLogin;
