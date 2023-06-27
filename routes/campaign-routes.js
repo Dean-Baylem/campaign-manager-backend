@@ -23,7 +23,7 @@ router.patch("/update/:campaignid", campaignControllers.updateCampaign);
 
 router.patch("/updatevillain/:campaignid/:npcid", campaignControllers.setMainVillain);
 
-router.delete("/:campaignid", campaignControllers.deleteCampaign);
+router.delete("/deletecampaign/:campaignid", campaignControllers.deleteCampaign);
 
 // Campaign Objective Routes
 
