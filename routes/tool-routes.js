@@ -7,11 +7,10 @@ const router = express.Router();
 router.post(
   "/add-items",
   [
-    check("name").not().isEmpty(),
-    check("type").not().isEmpty(),
-    check("rarity").not().isEmpty(),
-    check("rarity").not().isEmpty(),
-    check("source").not().isEmpty(),
+    check("Name").not().isEmpty(),
+    check("Type").not().isEmpty(),
+    check("Rarity").not().isEmpty(),
+    check("Source").not().isEmpty(),
   ],
   toolContainers.addItmes
 );
