@@ -79,6 +79,7 @@ const getCampaignById = async (req, res, next) => {
       .populate({path: "locations"})
       .populate({path: "objectives"})
       .populate({path: "bbeg"})
+      .populate({path: "plots"})
   } catch (err) {
     return next(
       new HttpError("Unable to find campaign, please try again later.", 500)
