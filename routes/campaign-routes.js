@@ -7,6 +7,7 @@ const sessionControllers = require("../controllers/campaign-controllers/session-
 const eventControllers = require("../controllers/campaign-controllers/event-controllers");
 const objectiveControllers = require("../controllers/campaign-controllers/objective-controllers");
 const locationControllers = require("../controllers/campaign-controllers/location-controllers");
+const plotControllers = require("../controllers/campaign-controllers/plot-controllers");
 const router = express.Router();
 
 // Core Campaign Routes
@@ -34,6 +35,10 @@ router.get("/getobjectivesforcampaign/:campaignid", objectiveControllers.getObje
 router.patch("/updateobjective/:objectiveid", objectiveControllers.editObjectiveById);
 
 router.delete("/deleteobjective/:objectiveid", objectiveControllers.deleteObjectiveById);
+
+// Campaign Plot Act Routes
+
+router.post('/createplot/:campaignid', plotControllers.createPlot);
 
 // Campaign Location Routes
 

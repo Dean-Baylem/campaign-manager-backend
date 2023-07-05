@@ -32,7 +32,7 @@ app.use("/campaign", campaignRoutes);
 app.use('/character', characterRoutes);
 app.use("/npc", npcRoutes);
 app.use("/comment", commentRoutes);
-app.use
+
 
 
 // Handling Errors
