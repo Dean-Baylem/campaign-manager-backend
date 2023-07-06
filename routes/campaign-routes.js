@@ -40,6 +40,10 @@ router.delete("/deleteobjective/:objectiveid", objectiveControllers.deleteObject
 
 router.post('/createplot/:campaignid', plotControllers.createPlot);
 
+router.patch('/updateplot/:plotid', plotControllers.updatePlotById);
+
+router.delete('/deleteplot/:plotid', plotControllers.deletePlotById);
+
 // Campaign Location Routes
 
 router.post("/createlocation/:campaignid", locationControllers.createLocation);
