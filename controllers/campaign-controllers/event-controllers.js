@@ -104,6 +104,7 @@ const updateEventById = async (req, res, next) => {
 };
 
 const deleteEventById = async (req, res, next) => {
+  console.log(req.params.eventid);
   let event;
 
   try {

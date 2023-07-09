@@ -141,6 +141,17 @@ const removeFactionMembers = async (req, res, next) => {
     });
 };
 
+const getFactionById = async (req, res, next) => {
+  let faction;
+  try {
+    faction = await Faction.findById(req.params.factionid).populate({path: "campaign", select: "gameMaster"}).populate("members");
+  } catch (err) {
+    return next(new HttpError("Unable to find faction. Please check details and try again", 422));
+  }
+
+  res.status(200).json({faction: faction});
+}
+
 const getFactionsByCampaignId = async (req, res, next) => {
   let factions;
   let campaignId = req.params.campaignid;
@@ -216,6 +227,7 @@ const updateFaction = async (req, res, next) => {
 exports.createFaction = createFaction;
 exports.addFactionMembers = addFactionMembers;
 exports.removeFactionMembers = removeFactionMembers;
+exports.getFactionById = getFactionById;
 exports.getFactionsByCampaignId = getFactionsByCampaignId;
 exports.deleteFactionById = deleteFactionById;
 exports.updateFaction = updateFaction;

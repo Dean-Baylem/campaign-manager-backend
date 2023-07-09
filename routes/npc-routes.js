@@ -30,6 +30,8 @@ router.post("/faction/new-faction/:campaignid", factionControllers.createFaction
 
 router.get("/faction/getbycampaign/:campaignid", factionControllers.getFactionsByCampaignId);
 
+router.get("/faction/getbyid/:factionid", factionControllers.getFactionById);
+
 router.patch("/faction/edit/:factionid", factionControllers.updateFaction);
 
 router.patch("/faction/add-members/:factionid", factionControllers.addFactionMembers);
