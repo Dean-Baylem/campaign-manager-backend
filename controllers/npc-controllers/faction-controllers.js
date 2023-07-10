@@ -133,24 +133,29 @@ const removeFactionMembers = async (req, res, next) => {
     }
   }
 
-  res
-    .status(200)
-    .json({
-      message: "NPC's removed from Faction.",
-      faction: faction.toObject({ getters: true }),
-    });
+  res.status(200).json({
+    message: "NPC's removed from Faction.",
+    faction: faction.toObject({ getters: true }),
+  });
 };
 
 const getFactionById = async (req, res, next) => {
   let faction;
   try {
-    faction = await Faction.findById(req.params.factionid).populate({path: "campaign", select: "gameMaster"}).populate("members");
+    faction = await Faction.findById(req.params.factionid)
+      .populate({ path: "campaign", select: "gameMaster" })
+      .populate("members");
   } catch (err) {
-    return next(new HttpError("Unable to find faction. Please check details and try again", 422));
+    return next(
+      new HttpError(
+        "Unable to find faction. Please check details and try again",
+        422
+      )
+    );
   }
 
-  res.status(200).json({faction: faction});
-}
+  res.status(200).json({ faction: faction });
+};
 
 const getFactionsByCampaignId = async (req, res, next) => {
   let factions;
@@ -205,10 +210,15 @@ const updateFaction = async (req, res, next) => {
   try {
     faction = await Faction.findById(req.params.factionid);
   } catch (err) {
-    return next(new HttpError("Unable to find faction. Please check details and try again", 422));
+    return next(
+      new HttpError(
+        "Unable to find faction. Please check details and try again",
+        422
+      )
+    );
   }
 
-  let { factionName, factionMotto, factionToken, factionDesc} = req.body;
+  let { factionName, factionMotto, factionToken, factionDesc } = req.body;
 
   faction.factionName = factionName;
   faction.factionMotto = factionMotto;
@@ -218,11 +228,93 @@ const updateFaction = async (req, res, next) => {
   try {
     await faction.save();
   } catch (err) {
-    return next(new HttpError("Unable to save changes at this time. Please try again later", 500));
+    return next(
+      new HttpError(
+        "Unable to save changes at this time. Please try again later",
+        500
+      )
+    );
   }
 
-  res.status(200).json({message: "Update complete", faction: faction.toObject({getters: true})});
-}
+  res
+    .status(200)
+    .json({
+      message: "Update complete",
+      faction: faction.toObject({ getters: true }),
+    });
+};
+
+const addFactionNote = async (req, res, next) => {
+  let faction;
+  try {
+    faction = await Faction.findById(req.params.factionid);
+  } catch (err) {
+    return next(
+      new HttpError(
+        "Unable to find Faction with details provided. Please check and try again",
+        422
+      )
+    );
+  }
+
+  let { title, note } = req.body;
+  const newNote = {
+    title,
+    note,
+  };
+
+  try {
+    faction.factionNotes.push(newNote);
+    await faction.save();
+  } catch (err) {
+    return next(
+      new HttpError("Unable to save note. Please try again later", 500)
+    );
+  }
+
+  res.status(201).json({ message: "Node added", note: newNote });
+};
+
+const editFactionNote = async (req, res, next) => {
+  let faction;
+  try {
+    faction = await Faction.findById(req.params.factionid);
+  } catch (err) {
+    return next(
+      new HttpError(
+        "Unable to find faction this note is for, please check details and try again",
+        422
+      )
+    );
+  }
+
+  let notes = faction.factionNotes.filter(
+    (note) => note.id !== req.params.noteid
+  );
+
+  let { title, note } = req.body;
+
+  let editedNote = {
+    title,
+    note,
+  };
+
+  notes.push(editedNote);
+
+  faction.factionNotes = notes;
+
+  try {
+    await faction.save();
+  } catch (err) {
+    return next(
+      new HttpError("Unable to save at this time. Please try again later.", 500)
+    );
+  }
+
+  res
+    .status(200)
+    .json({ message: "Okay!", factionNotes: faction.factionNotes });
+};
 
 exports.createFaction = createFaction;
 exports.addFactionMembers = addFactionMembers;
@@ -231,3 +323,5 @@ exports.getFactionById = getFactionById;
 exports.getFactionsByCampaignId = getFactionsByCampaignId;
 exports.deleteFactionById = deleteFactionById;
 exports.updateFaction = updateFaction;
+exports.addFactionNote = addFactionNote;
+exports.editFactionNote = editFactionNote;

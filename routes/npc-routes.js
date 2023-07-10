@@ -9,7 +9,11 @@ const router = express.Router();
 
 router.post(
   "/npc/new-npc/:campaignid",
-  [check("name").not().isEmpty(), check("species").not().isEmpty(), check("appearance").isLength({max: 150})],
+  [
+    check("name").not().isEmpty(),
+    check("species").not().isEmpty(),
+    check("appearance").isLength({ max: 150 }),
+  ],
   npcControllers.createNPC
 );
 
@@ -26,18 +30,43 @@ router.delete("/npc/:npcid", npcControllers.deleteNPC);
 
 // Faction CRUD routes
 
-router.post("/faction/new-faction/:campaignid", factionControllers.createFaction);
+router.post(
+  "/faction/new-faction/:campaignid",
+  factionControllers.createFaction
+);
 
-router.get("/faction/getbycampaign/:campaignid", factionControllers.getFactionsByCampaignId);
+router.post(
+  "/faction/note/addnote/:factionid",
+  factionControllers.addFactionNote
+);
+
+router.patch(
+  "/faction/note/:noteid/editnote/:factionid",
+  factionControllers.editFactionNote
+);
+
+router.get(
+  "/faction/getbycampaign/:campaignid",
+  factionControllers.getFactionsByCampaignId
+);
 
 router.get("/faction/getbyid/:factionid", factionControllers.getFactionById);
 
 router.patch("/faction/edit/:factionid", factionControllers.updateFaction);
 
-router.patch("/faction/add-members/:factionid", factionControllers.addFactionMembers);
+router.patch(
+  "/faction/add-members/:factionid",
+  factionControllers.addFactionMembers
+);
 
-router.patch("/faction/remove-members/:factionid", factionControllers.removeFactionMembers);
+router.patch(
+  "/faction/remove-members/:factionid",
+  factionControllers.removeFactionMembers
+);
 
-router.delete("/faction/deletebyid/:factionid", factionControllers.deleteFactionById);
+router.delete(
+  "/faction/deletebyid/:factionid",
+  factionControllers.deleteFactionById
+);
 
 module.exports = router;
