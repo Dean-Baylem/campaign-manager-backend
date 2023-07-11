@@ -8,7 +8,7 @@ const router = express.Router();
 // Individual NPC CRUD routes
 
 router.post(
-  "/npc/new-npc/:campaignid",
+  "/new-npc/:campaignid",
   [
     check("name").not().isEmpty(),
     check("species").not().isEmpty(),
@@ -26,7 +26,7 @@ router.get(
 
 router.patch("/npc/:npcid", npcControllers.updateNPC);
 
-router.delete("/npc/:npcid", npcControllers.deleteNPC);
+router.delete("/deletenpc/:npcid", npcControllers.deleteNPC);
 
 // Faction CRUD routes
 
@@ -67,6 +67,10 @@ router.patch(
 router.delete(
   "/faction/deletebyid/:factionid",
   factionControllers.deleteFactionById
+);
+
+router.delete(
+  "/faction/note/:noteid/delete/:factionid", factionControllers.deleteFactionNoteById
 );
 
 module.exports = router;

@@ -236,12 +236,10 @@ const updateFaction = async (req, res, next) => {
     );
   }
 
-  res
-    .status(200)
-    .json({
-      message: "Update complete",
-      faction: faction.toObject({ getters: true }),
-    });
+  res.status(200).json({
+    message: "Update complete",
+    faction: faction.toObject({ getters: true }),
+  });
 };
 
 const addFactionNote = async (req, res, next) => {
@@ -274,6 +272,25 @@ const addFactionNote = async (req, res, next) => {
 
   res.status(201).json({ message: "Node added", note: newNote });
 };
+
+const deleteFactionNoteById = async (req, res, next) => {
+  let faction;
+  try {
+    faction = await Faction.findById(req.params.factionid);
+  } catch (err) {
+    return next(new HttpError("Unable to find faction, please check details and try again."), 422);
+  }
+
+  faction.factionNotes = faction.factionNotes.filter((note) => note.id !== req.params.noteid);
+
+  try {
+    await faction.save();
+  } catch (err) {
+    return next(new HttpError("Unable to delete faction note at this time. Please try again later."))
+  }
+
+  res.status(200).json({message: "Delete Successful!"});
+}
 
 const editFactionNote = async (req, res, next) => {
   let faction;
@@ -325,3 +342,4 @@ exports.deleteFactionById = deleteFactionById;
 exports.updateFaction = updateFaction;
 exports.addFactionNote = addFactionNote;
 exports.editFactionNote = editFactionNote;
+exports.deleteFactionNoteById = deleteFactionNoteById;
